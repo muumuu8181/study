@@ -1,0 +1,25 @@
+# GitHub Pages設定
+title: "色彩検定2級クイズアプリ"
+description: "AI搭載の高機能色彩検定学習アプリケーション"
+url: "https://muumuu8181.github.io"
+baseurl: "/study"
+
+# Jekyll設定
+markdown: kramdown
+highlighter: rouge
+theme: minima
+
+# プラグイン
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+
+# 除外ファイル
+exclude:
+  - README.md
+  - _old/
+  - q/
+  - "*.bat"
+  - "*.sh"
+  - "*.py"
+  - .gitignore

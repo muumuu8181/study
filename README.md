@@ -31,7 +31,24 @@ AI搭載の高機能色彩検定学習アプリケーション。科学的な学
 
 ## 🚀 デモ
 
-**👉 [今すぐ試す](https://muumuu8181.github.io/study/)**
+**👉 [GitHub Pagesで試す](https://muumuu8181.github.io/study/)**
+
+> 📝 **GitHub Pages設定**: リポジトリの Settings > Pages で Source を "Deploy from a branch" > "main" に設定してください
+
+### ローカル実行
+```bash
+# リポジトリをクローン
+git clone https://github.com/muumuu8181/study.git
+cd study
+
+# ローカルサーバーで起動（Python）
+python -m http.server 8000
+# または Node.js
+npx serve .
+
+# ブラウザで開く
+open http://localhost:8000
+```
 
 ## 📱 対応環境
 
