@@ -1,0 +1,37 @@
+# 一般的な除外ファイル
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# バックアップファイル
+*.bak
+*.backup
+*~
+
+# 一時ファイル
+*.tmp
+*.temp
+
+# ログファイル
+*.log
+
+# ローカル設定ファイル
+.vscode/
+*.swp
+*.swo
+
+# 古いファイル
+_old/
+*.old
+
+# バッチファイル（ローカル用）
+*.bat
+*.sh
+
+# Python関連（ローカル用）
+*.py
+__pycache__/
+*.pyc
+
+# 不要なディレクトリ
+q/

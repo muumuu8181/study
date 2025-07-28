@@ -80,6 +80,81 @@
                         </select>
                     </label>
                 </div>
+                <div class="quiz-mode-setting">
+                    <h3>モード選択:</h3>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="quiz-mode" value="normal" checked>
+                            <span class="radio-text">✨ 新規問題</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="quiz-mode" value="review-mastery">
+                            <span class="radio-text">🎯 習熟度別</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="quiz-mode" value="review-recent-incorrect">
+                            <span class="radio-text">⚡ 間違えた問題</span>
+                        </label>
+                    </div>
+                    
+                    <!-- 習熟度別選択 -->
+                    <div class="mastery-filter" id="mastery-filter" style="display: none;">
+                        <label>
+                            習熟度レベル:
+                            <select id="mastery-level-select">
+                                <option value="0-3">0-3 (要復習)</option>
+                                <option value="4-7">4-7 (普通)</option>
+                                <option value="8-10">8-10 (上級)</option>
+                                <option value="0-5">0-5 (基礎)</option>
+                                <option value="6-10">6-10 (応用)</option>
+                                <option value="custom">カスタム範囲</option>
+                            </select>
+                        </label>
+                        <div class="custom-mastery-range" id="custom-mastery-range" style="display: none;">
+                            <label>
+                                最小値: <input type="number" id="mastery-min" min="0" max="10" value="0">
+                            </label>
+                            <label>
+                                最大値: <input type="number" id="mastery-max" min="0" max="10" value="3">
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- 期間別選択 -->
+                    <div class="period-filter" id="period-filter" style="display: none;">
+                        <label>
+                            期間タイプ:
+                            <select id="period-type-select">
+                                <option value="within">〜以内</option>
+                                <option value="range">期間範囲</option>
+                            </select>
+                        </label>
+                        
+                        <!-- 以内選択 -->
+                        <div class="period-within" id="period-within">
+                            <label>
+                                期間:
+                                <select id="period-select">
+                                    <option value="today">今日間違えた</option>
+                                    <option value="3days">3日以内</option>
+                                    <option value="1week">1週間以内</option>
+                                    <option value="2weeks">2週間以内</option>
+                                    <option value="1month">1ヶ月以内</option>
+                                </select>
+                            </label>
+                        </div>
+                        
+                        <!-- 範囲選択 -->
+                        <div class="period-range" id="period-range" style="display: none;">
+                            <label>
+                                開始: <input type="number" id="period-start" min="0" max="365" value="7" step="1">日前
+                            </label>
+                            <label>
+                                終了: <input type="number" id="period-end" min="0" max="365" value="3" step="1">日前
+                            </label>
+                        </div>
+                    </div>
+                </div>
                 <button class="control-btn" id="start-btn">クイズ開始</button>
                 <button class="control-btn" id="next-btn" style="display: none;">次の問題</button>
                 <button class="control-btn secondary" id="manual-btn">📖 使い方</button>
@@ -140,12 +215,12 @@
 
         <div class="history-section">
             <h3>過去の成績</h3>
-            <div id="history-list"></div>
             <div class="controls">
                 <button class="control-btn" id="clear-history">履歴をクリア</button>
                 <button class="control-btn secondary" id="category-stats-btn">📊 中分類別成績</button>
                 <button class="control-btn secondary" id="mastery-stats-btn">🎯 習熟度分析</button>
             </div>
+            <div id="history-list"></div>
         </div>
     </div>
 
@@ -264,6 +339,8 @@
         </div>
     </div>
 
+    <script src="safe-storage.js"></script>
+    <script src="safe-dom-helper.js"></script>
     <script src="questions.js"></script>
     <script src="script.js"></script>
 </body>

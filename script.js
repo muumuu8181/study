@@ -8,27 +8,28 @@ class QuizApp {
         this.autoProgressTimer = null;
         this.dataSource = 'unknown';
         this.loadError = null;
-        this.history = JSON.parse(localStorage.getItem('quizHistory') || '[]');
+        // 安全なLocalStorage読み込み
+        this.history = SafeStorage.getItem('quizHistory', []);
         
         // 習熟度システム用データ
-        this.masteryData = JSON.parse(localStorage.getItem('masteryData') || '{}');
-        this.categoryStats = JSON.parse(localStorage.getItem('categoryStats') || '{}');
+        this.masteryData = SafeStorage.getItem('masteryData', {});
+        this.categoryStats = SafeStorage.getItem('categoryStats', {});
         
         // 各問題の習熟度 (0-10段階)
-        this.questionMastery = JSON.parse(localStorage.getItem('questionMastery') || '{}');
+        this.questionMastery = SafeStorage.getItem('questionMastery', {});
         
         // 回答履歴 (エビングハウス曲線用)
-        this.answerHistory = JSON.parse(localStorage.getItem('answerHistory') || '{}');
+        this.answerHistory = SafeStorage.getItem('answerHistory', {});
         
         // 習熟度設定（シンプル）
-        this.masteryConfig = JSON.parse(localStorage.getItem('masteryConfig') || JSON.stringify({
+        this.masteryConfig = SafeStorage.getItem('masteryConfig', {
             // 時間減衰設定
             decayDays: 14,          // この日数後から減衰開始
             reviewDays: 7,          // この日数経過で復習推奨
             
             // 復習設定
             reviewMasteryThreshold: 7, // この値未満は復習対象
-        }));
+        });
         
         this.initializeElements();
         this.setupEventListeners();
@@ -80,6 +81,7 @@ class QuizApp {
         this.sourceIndicator = document.getElementById('source-indicator');
         this.historyDots = document.getElementById('history-dots');
         this.questionCountSelect = document.getElementById('question-count');
+        this.quizModeRadios = document.querySelectorAll('input[name="quiz-mode"]');
         this.majorCategory = document.getElementById('major-category');
         this.minorCategory = document.getElementById('minor-category');
         this.categorySummary = document.getElementById('category-summary');
@@ -96,6 +98,22 @@ class QuizApp {
         this.answerHistory = [];
         this.selectedQuestionCount = 5;
         this.allQuestions = [];
+        
+        // 新しいフィルター要素
+        this.masteryFilter = document.getElementById('mastery-filter');
+        this.periodFilter = document.getElementById('period-filter');
+        this.masteryLevelSelect = document.getElementById('mastery-level-select');
+        this.periodSelect = document.getElementById('period-select');
+        this.customMasteryRange = document.getElementById('custom-mastery-range');
+        this.masteryMin = document.getElementById('mastery-min');
+        this.masteryMax = document.getElementById('mastery-max');
+        
+        // 期間範囲選択要素
+        this.periodTypeSelect = document.getElementById('period-type-select');
+        this.periodWithin = document.getElementById('period-within');
+        this.periodRange = document.getElementById('period-range');
+        this.periodStart = document.getElementById('period-start');
+        this.periodEnd = document.getElementById('period-end');
         this.categories = null;
         this.initializeImages();
     }
@@ -190,6 +208,117 @@ class QuizApp {
                 this.selectedQuestionCount = e.target.value === 'all' ? 'all' : parseInt(e.target.value);
             });
         }
+        
+        // クイズモード選択時のフィルター表示切り替え
+        this.quizModeRadios.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                this.toggleFilterVisibility(e.target.value);
+            });
+        });
+        
+        // 習熟度レベル選択
+        if (this.masteryLevelSelect) {
+            this.masteryLevelSelect.addEventListener('change', (e) => {
+                this.toggleCustomMasteryRange(e.target.value);
+            });
+        }
+        
+        // カスタム習熟度範囲の入力値変更
+        if (this.masteryMin) {
+            this.masteryMin.addEventListener('change', (e) => {
+                const max = parseInt(this.masteryMax.value);
+                if (parseInt(e.target.value) > max) {
+                    this.masteryMax.value = e.target.value;
+                }
+            });
+        }
+        
+        if (this.masteryMax) {
+            this.masteryMax.addEventListener('change', (e) => {
+                const min = parseInt(this.masteryMin.value);
+                if (parseInt(e.target.value) < min) {
+                    this.masteryMin.value = e.target.value;
+                }
+            });
+        }
+        
+        // 期間タイプ選択
+        if (this.periodTypeSelect) {
+            this.periodTypeSelect.addEventListener('change', (e) => {
+                this.togglePeriodType(e.target.value);
+            });
+        }
+        
+        // 期間範囲の入力値変更
+        if (this.periodStart) {
+            this.periodStart.addEventListener('change', (e) => {
+                const end = parseInt(this.periodEnd.value);
+                if (parseInt(e.target.value) < end) {
+                    this.periodEnd.value = e.target.value;
+                }
+            });
+        }
+        
+        if (this.periodEnd) {
+            this.periodEnd.addEventListener('change', (e) => {
+                const start = parseInt(this.periodStart.value);
+                if (parseInt(e.target.value) > start) {
+                    this.periodStart.value = e.target.value;
+                }
+            });
+        }
+    }
+    
+    // フィルター表示の切り替え
+    toggleFilterVisibility(mode) {
+        if (this.masteryFilter && this.periodFilter) {
+            this.masteryFilter.style.display = mode === 'review-mastery' ? 'block' : 'none';
+            this.periodFilter.style.display = mode === 'review-recent-incorrect' ? 'block' : 'none';
+        }
+    }
+    
+    // カスタム習熟度範囲の表示切り替え
+    toggleCustomMasteryRange(value) {
+        if (this.customMasteryRange) {
+            this.customMasteryRange.style.display = value === 'custom' ? 'block' : 'none';
+        }
+    }
+    
+    // 期間タイプの表示切り替え
+    togglePeriodType(type) {
+        if (this.periodWithin && this.periodRange) {
+            this.periodWithin.style.display = type === 'within' ? 'block' : 'none';
+            this.periodRange.style.display = type === 'range' ? 'block' : 'none';
+        }
+    }
+    
+    // 問題からユニークなハッシュを生成
+    generateQuestionHash(question) {
+        // 問題文と選択肢を結合してハッシュ化
+        const content = question.question + question.options.join('');
+        return this.simpleHash(content);
+    }
+    
+    // シンプルなハッシュ関数
+    simpleHash(str) {
+        let hash = 0;
+        if (str.length === 0) return hash;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // 32bit整数に変換
+        }
+        return Math.abs(hash).toString(36); // 36進数で短縮
+    }
+    
+    // 問題のユニークキーを取得（ハッシュ or インデックス）
+    getQuestionKey(question, index) {
+        // ハッシュがある場合はハッシュを使用、なければインデックス
+        if (question.id) {
+            return `id_${question.id}`;
+        }
+        const hash = this.generateQuestionHash(question);
+        return `h_${hash}`;
     }
     
     async loadQuestions() {
@@ -354,21 +483,45 @@ class QuizApp {
         this.showQuestion();
     }
     
-    // ランダムに指定された数の問題を選択
+    // クイズモードに応じて問題を選択
     selectRandomQuestions() {
-        const shuffledQuestions = [...this.allQuestions];
+        let targetQuestions = [];
+        
+        // 選択されたクイズモードを取得
+        const selectedMode = document.querySelector('input[name="quiz-mode"]:checked');
+        if (selectedMode) {
+            const mode = selectedMode.value;
+            if (mode === 'review-mastery') {
+                targetQuestions = this.getMasteryFilteredQuestions();
+            } else if (mode === 'review-recent-incorrect') {
+                targetQuestions = this.getPeriodFilteredQuestions();
+            } else {
+                targetQuestions = [...this.allQuestions];
+            }
+        } else {
+            targetQuestions = [...this.allQuestions];
+        }
+        
+        // 問題が見つからない場合の処理
+        if (targetQuestions.length === 0) {
+            alert('指定した条件に合う問題が見つかりません。全問題から選択します。');
+            targetQuestions = [...this.allQuestions];
+        }
         
         // Fisher-Yatesアルゴリズムでシャッフル
+        const shuffledQuestions = [...targetQuestions];
         for (let i = shuffledQuestions.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [shuffledQuestions[i], shuffledQuestions[j]] = [shuffledQuestions[j], shuffledQuestions[i]];
         }
         
         // 指定された数の問題を選択
-        if (this.selectedQuestionCount === 'all') {
+        const selectedCount = this.questionCountSelect.value;
+        if (selectedCount === 'all') {
             this.questions = shuffledQuestions;
         } else {
-            this.questions = shuffledQuestions.slice(0, this.selectedQuestionCount);
+            const count = parseInt(selectedCount);
+            this.questions = shuffledQuestions.slice(0, Math.min(count, shuffledQuestions.length));
         }
         
         this.totalQuestions = this.questions.length;
@@ -393,8 +546,278 @@ class QuizApp {
         this.updateAnswerHistory();
         // クイズ開始時のキャラクターメッセージ
         this.showCharacterMessage(this.getRandomMessage('start'));
+        // 選択されたモードに応じて問題を設定
+        const selectedMode = document.querySelector('input[name="quiz-mode"]:checked').value;
+        await this.setupQuestionsByMode(selectedMode);
+        
         // 問題を読み込んでからクイズを開始
         await this.loadQuestions();
+    }
+    
+    // 復習モード別の問題設定
+    async setupQuestionsByMode(mode) {
+        // データが読み込まれるまで待機
+        if (!this.allQuestions || this.allQuestions.length === 0) {
+            await this.loadQuestions();
+        }
+        
+        let targetQuestions = [];
+        
+        switch (mode) {
+            case 'review-low-mastery':
+                targetQuestions = this.getLowMasteryQuestions();
+                break;
+            case 'review-incorrect':
+                targetQuestions = this.getIncorrectQuestions();
+                break;
+            case 'review-recent-incorrect':
+                targetQuestions = this.getRecentIncorrectQuestions();
+                break;
+            case 'normal':
+            default:
+                targetQuestions = [...this.allQuestions];
+                break;
+        }
+        
+        if (targetQuestions.length === 0) {
+            alert('選択したモードに該当する問題がありません。通常モードで開始します。');
+            targetQuestions = [...this.allQuestions];
+        }
+        
+        // 問題をシャッフル
+        this.shuffleArray(targetQuestions);
+        
+        // 選択された問題数に制限
+        const selectedCount = this.questionCountSelect.value;
+        if (selectedCount !== 'all') {
+            const count = parseInt(selectedCount);
+            targetQuestions = targetQuestions.slice(0, count);
+        }
+        
+        this.questions = targetQuestions;
+    }
+    
+    // 習熟度が低い問題を取得（習熟度5以下）
+    getLowMasteryQuestions() {
+        const lowMasteryQuestions = [];
+        
+        for (let i = 0; i < this.allQuestions.length; i++) {
+            const questionKey = `q_${i}`;
+            const mastery = this.questionMastery[questionKey] || 0;
+            
+            if (mastery <= 5) {
+                lowMasteryQuestions.push(this.allQuestions[i]);
+            }
+        }
+        
+        // 習熟度の低い順でソート
+        lowMasteryQuestions.sort((a, b) => {
+            const indexA = this.allQuestions.indexOf(a);
+            const indexB = this.allQuestions.indexOf(b);
+            const masteryA = this.questionMastery[`q_${indexA}`] || 0;
+            const masteryB = this.questionMastery[`q_${indexB}`] || 0;
+            return masteryA - masteryB;
+        });
+        
+        return lowMasteryQuestions;
+    }
+    
+    // 過去に間違えた問題を取得
+    getIncorrectQuestions() {
+        const incorrectQuestions = [];
+        
+        for (let i = 0; i < this.allQuestions.length; i++) {
+            const questionKey = `q_${i}`;
+            const records = this.answerHistory[questionKey] || [];
+            
+            // 過去に間違えたことがある問題
+            const hasIncorrect = records.some(record => !record.correct);
+            if (hasIncorrect) {
+                incorrectQuestions.push(this.allQuestions[i]);
+            }
+        }
+        
+        // 正解率の低い順でソート
+        incorrectQuestions.sort((a, b) => {
+            const indexA = this.allQuestions.indexOf(a);
+            const indexB = this.allQuestions.indexOf(b);
+            const recordsA = this.answerHistory[`q_${indexA}`] || [];
+            const recordsB = this.answerHistory[`q_${indexB}`] || [];
+            
+            const correctRateA = recordsA.length > 0 ? 
+                recordsA.filter(r => r.correct).length / recordsA.length : 1;
+            const correctRateB = recordsB.length > 0 ? 
+                recordsB.filter(r => r.correct).length / recordsB.length : 1;
+            
+            return correctRateA - correctRateB;
+        });
+        
+        return incorrectQuestions;
+    }
+    
+    // 最近（1週間以内）間違えた問題を取得
+    getRecentIncorrectQuestions() {
+        const recentIncorrectQuestions = [];
+        const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+        
+        for (let i = 0; i < this.allQuestions.length; i++) {
+            const questionKey = `q_${i}`;
+            const records = this.answerHistory[questionKey] || [];
+            
+            // 1週間以内に間違えた記録があるか
+            const hasRecentIncorrect = records.some(record => 
+                !record.correct && record.timestamp > oneWeekAgo
+            );
+            
+            if (hasRecentIncorrect) {
+                recentIncorrectQuestions.push(this.allQuestions[i]);
+            }
+        }
+        
+        // 最近の間違いの新しい順でソート
+        recentIncorrectQuestions.sort((a, b) => {
+            const indexA = this.allQuestions.indexOf(a);
+            const indexB = this.allQuestions.indexOf(b);
+            const recordsA = this.answerHistory[`q_${indexA}`] || [];
+            const recordsB = this.answerHistory[`q_${indexB}`] || [];
+            
+            const lastIncorrectA = recordsA.filter(r => !r.correct && r.timestamp > oneWeekAgo)
+                .reduce((latest, record) => Math.max(latest, record.timestamp), 0);
+            const lastIncorrectB = recordsB.filter(r => !r.correct && r.timestamp > oneWeekAgo)
+                .reduce((latest, record) => Math.max(latest, record.timestamp), 0);
+            
+            return lastIncorrectB - lastIncorrectA; // 新しい順
+        });
+        
+        return recentIncorrectQuestions;
+    }
+    
+    // 習熟度フィルターによる問題取得
+    getMasteryFilteredQuestions() {
+        const masteryLevelValue = this.masteryLevelSelect ? this.masteryLevelSelect.value : '0-3';
+        let minMastery, maxMastery;
+        
+        if (masteryLevelValue === 'custom') {
+            minMastery = this.masteryMin ? parseInt(this.masteryMin.value) : 0;
+            maxMastery = this.masteryMax ? parseInt(this.masteryMax.value) : 3;
+        } else {
+            const range = masteryLevelValue.split('-');
+            minMastery = parseInt(range[0]);
+            maxMastery = parseInt(range[1]);
+        }
+        
+        const filteredQuestions = [];
+        
+        for (let i = 0; i < this.allQuestions.length; i++) {
+            const question = this.allQuestions[i];
+            const questionKey = this.getQuestionKey(question, i);
+            const mastery = this.questionMastery[questionKey] || 0;
+            
+            if (mastery >= minMastery && mastery <= maxMastery) {
+                filteredQuestions.push(question);
+            }
+        }
+        
+        // 習熟度の低い順でソート
+        filteredQuestions.sort((a, b) => {
+            const indexA = this.allQuestions.indexOf(a);
+            const indexB = this.allQuestions.indexOf(b);
+            const keyA = this.getQuestionKey(a, indexA);
+            const keyB = this.getQuestionKey(b, indexB);
+            const masteryA = this.questionMastery[keyA] || 0;
+            const masteryB = this.questionMastery[keyB] || 0;
+            return masteryA - masteryB;
+        });
+        
+        return filteredQuestions;
+    }
+    
+    // 期間フィルターによる問題取得
+    getPeriodFilteredQuestions() {
+        const periodType = this.periodTypeSelect ? this.periodTypeSelect.value : 'within';
+        let startTime, endTime;
+        
+        const now = Date.now();
+        
+        if (periodType === 'range') {
+            // 範囲選択
+            const startDays = this.periodStart ? parseInt(this.periodStart.value) : 7;
+            const endDays = this.periodEnd ? parseInt(this.periodEnd.value) : 3;
+            
+            startTime = now - (startDays * 24 * 60 * 60 * 1000);
+            endTime = now - (endDays * 24 * 60 * 60 * 1000);
+        } else {
+            // 以内選択
+            const periodValue = this.periodSelect ? this.periodSelect.value : 'today';
+            switch (periodValue) {
+                case 'today':
+                    const todayStart = new Date();
+                    todayStart.setHours(0, 0, 0, 0);
+                    startTime = todayStart.getTime();
+                    endTime = now;
+                    break;
+                case '3days':
+                    startTime = now - (3 * 24 * 60 * 60 * 1000);
+                    endTime = now;
+                    break;
+                case '1week':
+                    startTime = now - (7 * 24 * 60 * 60 * 1000);
+                    endTime = now;
+                    break;
+                case '2weeks':
+                    startTime = now - (14 * 24 * 60 * 60 * 1000);
+                    endTime = now;
+                    break;
+                case '1month':
+                    startTime = now - (30 * 24 * 60 * 60 * 1000);
+                    endTime = now;
+                    break;
+                default:
+                    startTime = now - (7 * 24 * 60 * 60 * 1000);
+                    endTime = now;
+            }
+        }
+        
+        const filteredQuestions = [];
+        
+        for (let i = 0; i < this.allQuestions.length; i++) {
+            const question = this.allQuestions[i];
+            const questionKey = this.getQuestionKey(question, i);
+            const records = this.answerHistory[questionKey] || [];
+            
+            // 指定期間内に間違えた記録があるか
+            const hasIncorrectInPeriod = records.some(record => 
+                !record.correct && 
+                record.timestamp >= startTime && 
+                record.timestamp <= endTime
+            );
+            
+            if (hasIncorrectInPeriod) {
+                filteredQuestions.push(question);
+            }
+        }
+        
+        // 最近の間違いの新しい順でソート
+        filteredQuestions.sort((a, b) => {
+            const indexA = this.allQuestions.indexOf(a);
+            const indexB = this.allQuestions.indexOf(b);
+            const keyA = this.getQuestionKey(a, indexA);
+            const keyB = this.getQuestionKey(b, indexB);
+            const recordsA = this.answerHistory[keyA] || [];
+            const recordsB = this.answerHistory[keyB] || [];
+            
+            const lastIncorrectA = recordsA.filter(r => 
+                !r.correct && r.timestamp >= startTime && r.timestamp <= endTime
+            ).reduce((latest, record) => Math.max(latest, record.timestamp), 0);
+            
+            const lastIncorrectB = recordsB.filter(r => 
+                !r.correct && r.timestamp >= startTime && r.timestamp <= endTime
+            ).reduce((latest, record) => Math.max(latest, record.timestamp), 0);
+            
+            return lastIncorrectB - lastIncorrectA; // 新しい順
+        });
+        
+        return filteredQuestions;
     }
     
     showQuestion() {
@@ -467,16 +890,19 @@ class QuizApp {
         // 自動進行または手動進行の制御（0.2秒に短縮）
         if (this.currentQuestionIndex < this.questions.length - 1) {
             if (this.autoProgressCheckbox.checked) {
+                // 次へ次へのテンポ重視設定
+                const delay = this.skipAnimations ? 200 : 500; // 0.2秒 または 0.5秒
                 this.autoProgressTimer = setTimeout(() => {
                     this.nextQuestion();
-                }, 200);
+                }, delay);
             } else {
                 // 手動進行：次の問題ボタンを表示
                 this.nextBtn.style.display = 'inline-block';
             }
         } else {
-            // 最後の問題：0.2秒後に結果表示
-            setTimeout(() => this.showResults(), 200);
+            // 最後の問題：すぐに結果表示
+            const delay = this.skipAnimations ? 200 : 400; // 0.2秒 または 0.4秒
+            setTimeout(() => this.showResults(), delay);
         }
     }
     
@@ -556,35 +982,16 @@ class QuizApp {
             this.history = this.history.slice(0, 10);
         }
         
-        localStorage.setItem('quizHistory', JSON.stringify(this.history));
+        SafeStorage.setItem('quizHistory', this.history);
     }
     
     loadHistory() {
-        this.historyList.innerHTML = '';
+        // 安全な方法で要素をクリア
+        SafeDOMHelper.clearElement(this.historyList);
         
-        if (this.history.length === 0) {
-            this.historyList.innerHTML = '<p style="text-align: center; color: #666;">まだ記録がありません</p>';
-            return;
-        }
-        
-        this.history.forEach(result => {
-            const historyItem = document.createElement('div');
-            historyItem.className = 'history-item';
-            
-            let accuracyClass = '';
-            if (result.accuracy >= 90) accuracyClass = 'excellent';
-            else if (result.accuracy >= 70) accuracyClass = 'good';
-            else if (result.accuracy >= 50) accuracyClass = 'average';
-            else accuracyClass = 'needs-improvement';
-            
-            historyItem.innerHTML = `
-                <span class="history-date">${result.date}</span>
-                <span class="history-score">${result.score}/${result.total}</span>
-                <span class="history-accuracy ${accuracyClass}">${result.accuracy}%</span>
-            `;
-            
-            this.historyList.appendChild(historyItem);
-        });
+        // テーブル形式で履歴を表示
+        const historyTable = SafeDOMHelper.createHistoryTable(this.history);
+        this.historyList.appendChild(historyTable);
     }
     
     clearHistory() {
@@ -607,11 +1014,15 @@ class QuizApp {
     
     // 習熟度システム
     updateQuestionMastery(questionIndex, isCorrect) {
-        // 実際の問題配列内でのインデックスを取得
+        // 現在の問題を取得
+        const currentQuestion = this.questions[questionIndex];
         const actualQuestionIndex = this.allQuestions.findIndex(q => 
-            q.question === this.questions[questionIndex].question
+            q.question === currentQuestion.question && 
+            JSON.stringify(q.options) === JSON.stringify(currentQuestion.options)
         );
-        const questionKey = `q_${actualQuestionIndex >= 0 ? actualQuestionIndex : questionIndex}`;
+        
+        // ハッシュベースのキーを生成
+        const questionKey = this.getQuestionKey(currentQuestion, actualQuestionIndex >= 0 ? actualQuestionIndex : questionIndex);
         const now = Date.now();
         
         // 回答履歴を記録
@@ -635,8 +1046,8 @@ class QuizApp {
         this.questionMastery[questionKey] = mastery;
         
         // ローカルストレージに保存
-        localStorage.setItem('answerHistory', JSON.stringify(this.answerHistory));
-        localStorage.setItem('questionMastery', JSON.stringify(this.questionMastery));
+        SafeStorage.setItem('answerHistory', this.answerHistory);
+        SafeStorage.setItem('questionMastery', this.questionMastery);
     }
     
     calculateMastery(questionKey) {
@@ -774,30 +1185,38 @@ class QuizApp {
         
         modalTitle.textContent = '📊 中分類別成績分析';
         
-        let html = '<div class="stats-section">';
-        html += '<h3>カテゴリー別成績 (直近4週間)</h3>';
-        html += '<table class="stats-table">';
-        html += '<tr><th>カテゴリー</th><th>4週間の記録</th><th>進捗</th><th>習熟度</th><th>正解率</th></tr>';
+        // 安全な方法で既存コンテンツをクリア
+        SafeDOMHelper.clearElement(modalBody);
+        
+        // セクションコンテナ作成
+        const statsSection = SafeDOMHelper.createElement('div', '', 'stats-section');
+        const sectionTitle = SafeDOMHelper.createElement('h3', 'カテゴリー別成績 (直近4週間)');
+        statsSection.appendChild(sectionTitle);
+        
+        // テーブルデータの準備
+        const headers = ['カテゴリー', '4週間の記録', '進捗', '習熟度', '正解率'];
+        const rows = [];
         
         Object.keys(categoryStats).forEach(categoryName => {
             const stats = categoryStats[categoryName];
             if (stats.totalQuestions > 0) {
-                const progressBar = `<div class="mastery-bar-graph"><div class="mastery-bar-fill mastery-level-${Math.floor(stats.progress/10)}" style="width: ${stats.progress}%"></div></div>`;
-                const masteryBar = `<div class="mastery-bar-graph"><div class="mastery-bar-fill mastery-level-${Math.floor(stats.averageMastery)}" style="width: ${stats.averageMastery*10}%"></div></div>`;
+                const categoryInfo = `${categoryName} (${stats.answeredCount}/${stats.totalQuestions}問)`;
                 
-                html += '<tr>';
-                html += `<td><strong>${categoryName}</strong><br><small>${stats.answeredCount}/${stats.totalQuestions}問</small></td>`;
-                html += `<td><small>${stats.recordSummary}</small></td>`;
-                html += `<td>${progressBar}<small>${stats.progress.toFixed(1)}%</small></td>`;
-                html += `<td>${masteryBar}<small>${stats.averageMastery.toFixed(1)}/10</small></td>`;
-                html += `<td><strong>${stats.accuracy.toFixed(1)}%</strong></td>`;
-                html += '</tr>';
+                const row = [
+                    categoryInfo,
+                    stats.recordSummary,
+                    { type: 'progress', percentage: stats.progress },
+                    { type: 'mastery', value: stats.averageMastery },
+                    `${stats.accuracy.toFixed(1)}%`
+                ];
+                rows.push(row);
             }
         });
         
-        html += '</table></div>';
-        
-        modalBody.innerHTML = html;
+        // 安全なテーブル作成
+        const table = SafeDOMHelper.createTable(headers, rows);
+        statsSection.appendChild(table);
+        modalBody.appendChild(statsSection);
         modal.style.display = 'flex';
     }
     
@@ -829,10 +1248,10 @@ class QuizApp {
         html += '<h3>習熟度分布</h3>';
         
         // 習熟度分布グラフ
-        const maxCount = Math.max(...masteryLevels);
+        const maxCountOld = Math.max(...masteryLevels);
         for (let i = 0; i <= 10; i++) {
             const count = masteryLevels[i];
-            const percentage = maxCount > 0 ? (count / maxCount) * 100 : 0;
+            const percentage = maxCountOld > 0 ? (count / maxCountOld) * 100 : 0;
             html += `<div class="mastery-bar">`;
             html += `<span style="width: 30px; text-align: right; margin-right: 10px;">${i}:</span>`;
             html += `<div class="mastery-bar-graph">`;
@@ -955,7 +1374,51 @@ class QuizApp {
         html += '</table>';
         html += '</div>';
         
-        modalBody.innerHTML = html;
+        // 安全な方法でモーダルに表示
+        SafeDOMHelper.clearElement(modalBody);
+        
+        // 習熟度分布セクション
+        const distributionSection = SafeDOMHelper.createElement('div', '', 'stats-section');
+        const distributionTitle = SafeDOMHelper.createElement('h3', '習熟度分布');
+        distributionSection.appendChild(distributionTitle);
+        
+        // 習熟度分布バー
+        const maxCount = Math.max(...masteryLevels);
+        for (let i = 0; i <= 10; i++) {
+            const count = masteryLevels[i];
+            const masteryBar = SafeDOMHelper.createMasteryBar(i, count, maxCount);
+            distributionSection.appendChild(masteryBar);
+        }
+        
+        // 統計サマリー
+        const summarySection = SafeDOMHelper.createElement('div', '', 'stats-section');
+        const summaryTitle = SafeDOMHelper.createElement('h3', '統計サマリー');
+        summarySection.appendChild(summaryTitle);
+        
+        const averageText = document.createElement('p');
+        const averageStrong = SafeDOMHelper.createElement('strong', '平均習熟度: ');
+        const averageValue = SafeDOMHelper.createElement('span', `${averageMastery.toFixed(1)}/10`);
+        averageText.appendChild(averageStrong);
+        averageText.appendChild(averageValue);
+        
+        const totalText = document.createElement('p');
+        const totalStrong = SafeDOMHelper.createElement('strong', '学習済み問題数: ');
+        const totalValue = SafeDOMHelper.createElement('span', `${totalQuestions}問`);
+        totalText.appendChild(totalStrong);
+        totalText.appendChild(totalValue);
+        
+        const reviewText = document.createElement('p');
+        const reviewStrong = SafeDOMHelper.createElement('strong', '復習推奨問題: ');
+        const reviewValue = SafeDOMHelper.createElement('span', `${reviewQuestions.length}問`);
+        reviewText.appendChild(reviewStrong);
+        reviewText.appendChild(reviewValue);
+        
+        summarySection.appendChild(averageText);
+        summarySection.appendChild(totalText);
+        summarySection.appendChild(reviewText);
+        
+        modalBody.appendChild(distributionSection);
+        modalBody.appendChild(summarySection);
         modal.style.display = 'flex';
         
         // タブ切り替えとフィルタリング機能をグローバルに定義
@@ -1377,7 +1840,7 @@ class QuizApp {
     updateAnswerHistory() {
         if (!this.historyDots) return;
         
-        this.historyDots.innerHTML = '';
+        SafeDOMHelper.clearElement(this.historyDots);
         
         // 現在までの履歴を表示
         this.answerHistory.forEach((isCorrect, index) => {
