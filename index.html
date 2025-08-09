@@ -6,6 +6,153 @@
     <title>4択クイズアプリ</title>
     <link rel="stylesheet" href="quiz-style.css">
     
+    <!-- モバイル用レスポンシブスタイル -->
+    <style>
+        /* モバイル用スタイル（768px以下） */
+        @media (max-width: 768px) {
+            /* タイトルを小さく */
+            .title {
+                font-size: 20px !important;
+                padding: 8px !important;
+                margin: 5px 0 !important;
+            }
+            
+            /* バージョン番号も小さく */
+            .title span {
+                font-size: 11px !important;
+                top: 10px !important;
+                right: 10px !important;
+            }
+            
+            /* 認証セクションをコンパクトに */
+            .auth-section {
+                padding: 5px !important;
+                margin: 5px 0 !important;
+                font-size: 12px !important;
+            }
+            
+            .auth-btn {
+                padding: 5px 10px !important;
+                font-size: 12px !important;
+            }
+            
+            #userInfo {
+                font-size: 12px !important;
+            }
+            
+            #logoutBtn {
+                padding: 4px 8px !important;
+                font-size: 11px !important;
+                margin-left: 5px !important;
+            }
+            
+            /* 統計情報を1行に */
+            .stats {
+                display: flex !important;
+                justify-content: space-around !important;
+                padding: 5px !important;
+                font-size: 12px !important;
+                flex-wrap: nowrap !important;
+            }
+            
+            .stat {
+                margin: 0 2px !important;
+                white-space: nowrap !important;
+            }
+            
+            /* 履歴表示をコンパクトに */
+            .answer-history {
+                padding: 5px !important;
+                font-size: 11px !important;
+            }
+            
+            .history-label {
+                font-size: 11px !important;
+            }
+            
+            /* カテゴリー表示を小さく */
+            .category-display {
+                font-size: 11px !important;
+                padding: 3px !important;
+            }
+            
+            .major-category, .minor-category {
+                font-size: 11px !important;
+            }
+            
+            /* 問題番号と問題文を小さく */
+            .question-number {
+                font-size: 14px !important;
+                margin: 5px 0 !important;
+            }
+            
+            .question-text {
+                font-size: 13px !important;
+                padding: 8px !important;
+                margin: 5px 0 !important;
+            }
+            
+            /* 選択肢ボタンを小さく */
+            .option-btn {
+                padding: 10px !important;
+                font-size: 13px !important;
+                margin: 3px 0 !important;
+            }
+            
+            /* コントロールボタンを小さく */
+            .control-btn {
+                padding: 8px 12px !important;
+                font-size: 12px !important;
+                margin: 3px !important;
+            }
+            
+            /* 設定セクションを小さく */
+            .question-count-setting label,
+            .quiz-mode-setting h3,
+            .radio-text {
+                font-size: 12px !important;
+            }
+            
+            select, input[type="number"] {
+                font-size: 12px !important;
+                padding: 3px !important;
+            }
+            
+            /* 全体的なパディング調整 */
+            .container {
+                padding: 5px !important;
+            }
+            
+            header {
+                padding: 5px !important;
+            }
+            
+            .quiz-container {
+                padding: 5px !important;
+            }
+            
+            /* データソース表示を小さく */
+            .data-source {
+                font-size: 10px !important;
+                padding: 3px !important;
+            }
+            
+            /* カテゴリーサマリーを小さく */
+            .category-summary {
+                padding: 5px !important;
+                font-size: 11px !important;
+            }
+            
+            .major-category-title {
+                font-size: 12px !important;
+            }
+            
+            .minor-category-summary {
+                font-size: 10px !important;
+            }
+        }
+    </style>
+    
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
@@ -14,7 +161,7 @@
 <body>
     <div class="container">
         <header>
-            <h1 class="title">🎯 4択クイズアプリ <span style="position: absolute; right: 20px; top: 20px; font-size: 14px; color: #666;">v0.16</span></h1>
+            <h1 class="title">🎯 4択クイズアプリ <span style="position: absolute; right: 20px; top: 20px; font-size: 14px; color: #666;">v0.17</span></h1>
             
             <!-- Google認証セクション -->
             <div class="auth-section" id="authSection" style="background: #e7f3ff; padding: 8px; border-radius: 5px; margin: 10px 0; text-align: center;">
