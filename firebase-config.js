@@ -108,13 +108,28 @@ function updateAuthUI(isLoggedIn) {
     const userInfo = document.getElementById('userInfo');
     const userName = document.getElementById('userName');
     
+    console.log('🔄 UI更新:', {
+        isLoggedIn,
+        currentUser: currentUser?.displayName || currentUser?.email,
+        loginBtn: !!loginBtn,
+        userInfo: !!userInfo,
+        userName: !!userName
+    });
+    
+    if (!loginBtn || !userInfo || !userName) {
+        console.error('❌ UI要素が見つかりません');
+        return;
+    }
+    
     if (isLoggedIn && currentUser) {
         loginBtn.style.display = 'none';
         userInfo.style.display = 'inline-block';
         userName.textContent = currentUser.displayName || currentUser.email || 'ユーザー';
+        console.log('✅ ログインUI表示: ' + userName.textContent);
     } else {
         loginBtn.style.display = 'inline-block';
         userInfo.style.display = 'none';
+        console.log('✅ 未ログインUI表示');
     }
 }
 
