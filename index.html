@@ -6,8 +6,28 @@
     <title>4択クイズアプリ</title>
     <link rel="stylesheet" href="quiz-style.css">
     
-    <!-- モバイル用レスポンシブスタイル -->
+    <!-- PC用とモバイル用のスタイル -->
     <style>
+        /* PC用スタイル（デフォルト） */
+        header {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px;
+            border: 2px solid #90caf9;
+        }
+        
+        /* 選択肢ボタンの間隔（PC用） */
+        .options-section {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .option-btn {
+            margin: 5px 0;
+        }
+        
         /* モバイル用スタイル（768px以下） */
         @media (max-width: 768px) {
             /* パネルを黒枠ではっきり分ける */
@@ -290,8 +310,8 @@
 </head>
 <body>
     <div class="container">
-        <header style="background: #e3f2fd !important; padding: 15px !important; border-radius: 8px !important; margin: 10px !important; border: 2px solid #90caf9 !important;">
-            <h1 class="title">🎯 4択クイズアプリ <span style="position: absolute; right: 20px; top: 20px; font-size: 14px; color: #666;">v0.33</span></h1>
+        <header>
+            <h1 class="title">🎯 4択クイズアプリ <span style="position: absolute; right: 20px; top: 20px; font-size: 14px; color: #666;">v0.35</span></h1>
             
             <!-- Google認証セクション -->
             <div class="auth-section" id="authSection" style="background: #e7f3ff; padding: 8px; border-radius: 5px; margin: 10px 0; text-align: center;">
@@ -309,18 +329,18 @@
                 <table style="width: 100%; border-collapse: collapse; background: white; border: 1px solid #dee2e6; border-radius: 5px;">
                     <thead>
                         <tr style="background: #f8f9fa;">
-                            <th style="padding: 8px; text-align: center; border-right: 1px solid #dee2e6; font-size: 12px;">正解数</th>
-                            <th style="padding: 8px; text-align: center; border-right: 1px solid #dee2e6; font-size: 12px;">問題数</th>
-                            <th style="padding: 8px; text-align: center; font-size: 12px;">正解率</th>
+                            <th style="padding: 8px; text-align: center; border-right: 1px solid #dee2e6; font-size: 12px; color: #333;">正解数</th>
+                            <th style="padding: 8px; text-align: center; border-right: 1px solid #dee2e6; font-size: 12px; color: #333;">問題数</th>
+                            <th style="padding: 8px; text-align: center; font-size: 12px; color: #333;">正解率</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td style="padding: 8px; text-align: center; border-right: 1px solid #dee2e6; font-weight: bold; font-size: 14px;">
-                                <span id="correct-count">0</span>
+                            <td style="padding: 8px; text-align: center; border-right: 1px solid #dee2e6; font-weight: bold; font-size: 14px; color: #000;">
+                                <span id="correct-count" style="color: #000;">0</span>
                             </td>
-                            <td style="padding: 8px; text-align: center; border-right: 1px solid #dee2e6; font-weight: bold; font-size: 14px;">
-                                <span id="total-count">0</span>
+                            <td style="padding: 8px; text-align: center; border-right: 1px solid #dee2e6; font-weight: bold; font-size: 14px; color: #000;">
+                                <span id="total-count" style="color: #000;">0</span>
                             </td>
                             <td style="padding: 8px; text-align: center; font-weight: bold; font-size: 14px; color: #28a745;">
                                 <span id="accuracy">0%</span>
