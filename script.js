@@ -970,12 +970,15 @@ class QuizApp {
     }
     
     saveResult(accuracy) {
+        // 現在選択されているモードを取得
+        const currentMode = document.querySelector('input[name="quiz-mode"]:checked')?.value || 'normal';
+        
         const result = {
             date: new Date().toLocaleString('ja-JP'),
             score: this.score,
             total: this.questions.length,
             accuracy: accuracy,
-            mode: this.selectedMode,
+            mode: currentMode,
             timestamp: Date.now()
         };
         
@@ -993,7 +996,7 @@ class QuizApp {
                 correct: this.score,
                 total: this.questions.length,
                 accuracy: accuracy,
-                mode: this.selectedMode,
+                mode: currentMode,
                 masteryData: SafeStorage.getItem('masteryData', {})
             };
             window.firebaseAuth.saveQuizData(quizData);
@@ -1319,7 +1322,11 @@ class QuizApp {
             
             reviewQuestions.slice(0, 10).forEach((q, index) => {
                 const question = this.allQuestions[q.index];
-                const categoryName = this.categories.minor[question.category] || '未分類';
+                if (!question) {
+                    console.warn(`問題が見つかりません: index ${q.index}`);
+                    return;
+                }
+                const categoryName = this.categories.minor[question?.category] || '未分類';
                 const questionKey = `q_${q.index}`;
                 const records = this.answerHistory[questionKey] || [];
                 
@@ -1543,6 +1550,15 @@ class QuizApp {
         };
         
         this.showCharacterMessage(this.getRandomMessage('start'));
+    }
+    
+    // 配列をシャッフルする関数
+    shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
     }
     
     // 画像の自動検出と初期化
