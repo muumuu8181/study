@@ -10,11 +10,53 @@
     <style>
         /* モバイル用スタイル（768px以下） */
         @media (max-width: 768px) {
+            /* 履歴セクションを最下部に移動 */
+            .history-section {
+                order: 999 !important;
+            }
+            
+            /* flexコンテナ設定 */
+            .container {
+                display: flex !important;
+                flex-direction: column !important;
+            }
+            
+            /* ヘッダー部分の順序調整 */
+            header {
+                display: flex !important;
+                flex-direction: column !important;
+            }
+            
+            /* 履歴を最下部へ */
+            .answer-history {
+                order: 10 !important;
+            }
+            
+            /* カテゴリーサマリー（全112問）を下へ */
+            .category-summary {
+                order: 9 !important;
+            }
+            
+            /* データソースを下へ */
+            .data-source {
+                order: 8 !important;
+            }
             /* タイトルを小さく */
             .title {
                 font-size: 20px !important;
                 padding: 8px !important;
                 margin: 5px 0 !important;
+                order: 1 !important;
+            }
+            
+            /* 認証セクションの順序 */
+            .auth-section {
+                order: 2 !important;
+            }
+            
+            /* 統計情報の順序と1行表示 */
+            .stats {
+                order: 3 !important;
             }
             
             /* バージョン番号も小さく */
@@ -51,13 +93,20 @@
                 display: flex !important;
                 justify-content: space-around !important;
                 padding: 5px !important;
-                font-size: 12px !important;
+                font-size: 11px !important;
                 flex-wrap: nowrap !important;
+                gap: 10px !important;
             }
             
             .stat {
-                margin: 0 2px !important;
+                margin: 0 !important;
                 white-space: nowrap !important;
+                flex: 0 0 auto !important;
+            }
+            
+            /* 統計ラベルをコンパクトに */
+            .stat::after {
+                content: " " !important;
             }
             
             /* 履歴表示をコンパクトに */
@@ -161,7 +210,7 @@
 <body>
     <div class="container">
         <header>
-            <h1 class="title">🎯 4択クイズアプリ <span style="position: absolute; right: 20px; top: 20px; font-size: 14px; color: #666;">v0.17</span></h1>
+            <h1 class="title">🎯 4択クイズアプリ <span style="position: absolute; right: 20px; top: 20px; font-size: 14px; color: #666;">v0.18</span></h1>
             
             <!-- Google認証セクション -->
             <div class="auth-section" id="authSection" style="background: #e7f3ff; padding: 8px; border-radius: 5px; margin: 10px 0; text-align: center;">
