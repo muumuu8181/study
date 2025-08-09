@@ -585,7 +585,16 @@ class QuizApp {
         }
         
         // 問題をシャッフル
-        this.shuffleArray(targetQuestions);
+        if (typeof this.shuffleArray === 'function') {
+            this.shuffleArray(targetQuestions);
+        } else {
+            console.warn('shuffleArray関数が見つかりません。手動でシャッフルします。');
+            // インラインでシャッフル
+            for (let i = targetQuestions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [targetQuestions[i], targetQuestions[j]] = [targetQuestions[j], targetQuestions[i]];
+            }
+        }
         
         // 選択された問題数に制限
         const selectedCount = this.questionCountSelect.value;

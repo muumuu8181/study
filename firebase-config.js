@@ -143,12 +143,17 @@ function saveQuizDataToFirebase(quizData) {
     const userId = currentUser.uid;
     const timestamp = Date.now();
     
-    // クイズ結果を保存
-    database.ref(`users/${userId}/quiz_results/${timestamp}`).set({
+    // modeがundefinedの場合はデフォルト値を設定
+    const dataToSave = {
         ...quizData,
+        mode: quizData.mode || 'normal',  // undefinedの場合は'normal'を使用
         timestamp: timestamp,
         userEmail: currentUser.email,
         userName: currentUser.displayName
+    };
+    
+    // クイズ結果を保存
+    database.ref(`users/${userId}/quiz_results/${timestamp}`).set(dataToSave
     }).then(() => {
         console.log('✅ Firebaseにクイズデータ保存成功');
     }).catch((error) => {
