@@ -282,7 +282,7 @@
 <body>
     <div class="container">
         <header>
-            <h1 class="title">🎯 4択クイズアプリ <span style="position: absolute; right: 20px; top: 20px; font-size: 14px; color: #666;">v0.28</span></h1>
+            <h1 class="title">🎯 4択クイズアプリ <span style="position: absolute; right: 20px; top: 20px; font-size: 14px; color: #666;">v0.29</span></h1>
             
             <!-- Google認証セクション -->
             <div class="auth-section" id="authSection" style="background: #e7f3ff; padding: 8px; border-radius: 5px; margin: 10px 0; text-align: center;">
@@ -637,6 +637,7 @@
     <script src="safe-storage.js"></script>
     <script src="safe-dom-helper.js"></script>
     <script src="core-functions.js"></script>
+    <script src="core-auth.js"></script>
     
     <!-- カスタムUI（変更可能） -->
     <script src="custom-ui.js"></script>
@@ -677,65 +678,5 @@
     <!-- デバッグ用（本番環境では削除） -->
     <script src="debug-auth.js"></script>
     
-    <!-- 緊急修正：ログインボタンのイベントリスナーを直接設定 -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('🔧 緊急修正: イベントリスナー設定開始');
-            
-            const googleLoginBtn = document.getElementById('googleLoginBtn');
-            if (googleLoginBtn) {
-                console.log('✅ ログインボタン発見（緊急修正）');
-                
-                googleLoginBtn.addEventListener('click', async () => {
-                    console.log('🔐 ログインボタンクリック（緊急修正）');
-                    
-                    try {
-                        const provider = new firebase.auth.GoogleAuthProvider();
-                        console.log('プロバイダー作成完了');
-                        
-                        const result = await firebase.auth().signInWithPopup(provider);
-                        console.log('✅ ログイン成功！', result.user.displayName);
-                        
-                        // UI更新
-                        const userInfo = document.getElementById('userInfo');
-                        const userName = document.getElementById('userName');
-                        if (userInfo && userName) {
-                            googleLoginBtn.style.display = 'none';
-                            userInfo.style.display = 'inline-block';
-                            userName.textContent = result.user.displayName || result.user.email;
-                        }
-                        
-                    } catch (error) {
-                        console.error('❌ ログインエラー:', error.code, error.message);
-                        alert('ログインエラー: ' + error.message);
-                    }
-                });
-                
-                // ログアウトボタン
-                const logoutBtn = document.getElementById('logoutBtn');
-                if (logoutBtn) {
-                    logoutBtn.addEventListener('click', async () => {
-                        try {
-                            await firebase.auth().signOut();
-                            console.log('✅ ログアウト成功');
-                            
-                            // UI更新
-                            const userInfo = document.getElementById('userInfo');
-                            const googleLoginBtn = document.getElementById('googleLoginBtn');
-                            if (userInfo && googleLoginBtn) {
-                                userInfo.style.display = 'none';
-                                googleLoginBtn.style.display = 'inline-block';
-                            }
-                        } catch (error) {
-                            console.error('ログアウトエラー:', error);
-                        }
-                    });
-                }
-                
-            } else {
-                console.error('❌ ログインボタンが見つかりません（緊急修正）');
-            }
-        });
-    </script>
 </body>
 </html>

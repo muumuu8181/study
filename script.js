@@ -544,6 +544,11 @@ class QuizApp {
         this.resultsSection.style.display = 'none';
         this.feedback.textContent = '';
         this.feedback.className = 'feedback';
+        
+        // プログレスバーをリセット
+        if (this.progressFill) {
+            this.progressFill.style.width = '0%';
+        }
         // ヘッダー部分のカテゴリー情報を非表示にする
         if (this.categorySummary) {
             this.categorySummary.style.display = 'none';
