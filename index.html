@@ -89,25 +89,45 @@
                 margin-left: 5px !important;
             }
             
-            /* 統計情報を1行に */
+            /* 統計情報を確実に1行に */
             .stats {
                 display: flex !important;
-                justify-content: space-around !important;
-                padding: 5px !important;
-                font-size: 11px !important;
+                justify-content: space-between !important;
+                padding: 3px 5px !important;
+                font-size: 10px !important;
                 flex-wrap: nowrap !important;
-                gap: 10px !important;
+                gap: 5px !important;
+                white-space: nowrap !important;
             }
             
             .stat {
                 margin: 0 !important;
                 white-space: nowrap !important;
                 flex: 0 0 auto !important;
+                display: inline-block !important;
             }
             
-            /* 統計ラベルをコンパクトに */
-            .stat::after {
-                content: " " !important;
+            /* ラベルを短縮 */
+            .stat:nth-child(1)::before {
+                content: "✓" !important;
+                margin-right: 2px !important;
+            }
+            .stat:nth-child(2)::before {
+                content: "Q" !important;
+                margin-right: 2px !important;
+            }
+            .stat:nth-child(3)::before {
+                content: "%" !important;
+                margin-right: 2px !important;
+            }
+            
+            /* 元のラベルを非表示にして数値のみ表示 */
+            .stat {
+                font-size: 10px !important;
+            }
+            
+            .stat span {
+                font-weight: bold !important;
             }
             
             /* 履歴表示をコンパクトに */
@@ -132,8 +152,9 @@
             
             /* 問題番号と問題文を小さく */
             .question-number {
-                font-size: 14px !important;
-                margin: 5px 0 !important;
+                font-size: 12px !important;
+                margin: 3px 0 !important;
+                font-weight: normal !important;
             }
             
             .question-text {
@@ -211,7 +232,7 @@
 <body>
     <div class="container">
         <header>
-            <h1 class="title">🎯 4択クイズアプリ <span style="position: absolute; right: 20px; top: 20px; font-size: 14px; color: #666;">v0.20</span></h1>
+            <h1 class="title">🎯 4択クイズアプリ <span style="position: absolute; right: 20px; top: 20px; font-size: 14px; color: #666;">v0.21</span></h1>
             
             <!-- Google認証セクション -->
             <div class="auth-section" id="authSection" style="background: #e7f3ff; padding: 8px; border-radius: 5px; margin: 10px 0; text-align: center;">
