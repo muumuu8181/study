@@ -10,46 +10,37 @@
     <style>
         /* モバイル用スタイル（768px以下） */
         @media (max-width: 768px) {
-            /* 履歴セクションを最下部に移動 */
-            .history-section {
-                order: 999 !important;
-            }
-            
-            /* flexコンテナ設定 */
+            /* パネル構成の順序設定 */
             .container {
                 display: flex !important;
                 flex-direction: column !important;
             }
             
-            /* ヘッダー部分の順序調整 */
+            /* 1. タイトルパネル（最上部） */
             header {
+                order: 1 !important;
                 display: flex !important;
                 flex-direction: column !important;
             }
             
-            /* クイズコンテナを上部に配置 */
+            /* 2. メインパネル（クイズ部分を上部に） */
             .quiz-container {
+                order: 2 !important;
+            }
+            
+            /* 3. 結果パネル */
+            .results-section {
+                order: 3 !important;
+            }
+            
+            /* 4. 履歴パネル（最下部） */
+            .history-panel {
                 order: 4 !important;
             }
             
-            /* 結果セクション */
-            .results-section {
+            /* 5. 履歴セクション（一番下） */
+            .history-section {
                 order: 5 !important;
-            }
-            
-            /* データソースを下へ（履歴セクションの上） */
-            .data-source {
-                order: 11 !important;
-            }
-            
-            /* カテゴリーサマリー（全112問）を下へ（履歴セクションの上） */
-            .category-summary {
-                order: 12 !important;
-            }
-            
-            /* 履歴を下へ（データソースとカテゴリーサマリーの上） */
-            .answer-history {
-                order: 13 !important;
             }
             /* タイトルを小さく */
             .title {
@@ -220,7 +211,7 @@
 <body>
     <div class="container">
         <header>
-            <h1 class="title">🎯 4択クイズアプリ <span style="position: absolute; right: 20px; top: 20px; font-size: 14px; color: #666;">v0.19</span></h1>
+            <h1 class="title">🎯 4択クイズアプリ <span style="position: absolute; right: 20px; top: 20px; font-size: 14px; color: #666;">v0.20</span></h1>
             
             <!-- Google認証セクション -->
             <div class="auth-section" id="authSection" style="background: #e7f3ff; padding: 8px; border-radius: 5px; margin: 10px 0; text-align: center;">
@@ -240,19 +231,6 @@
                 <span class="stat">問題数: <span id="total-count">0</span></span>
                 <span class="stat">正解率: <span id="accuracy">0%</span></span>
             </div>
-            <div class="answer-history" id="answer-history">
-                <span class="history-label">履歴:</span>
-                <div class="history-dots" id="history-dots"></div>
-            </div>
-            <div class="data-source" id="data-source">
-                <span class="source-indicator" id="source-indicator">📊 データソース: 確認中...</span>
-            </div>
-            <div class="category-summary" id="category-summary" style="display: none;">
-                <div class="category-info">
-                    <div class="major-category-title" id="major-category-title">色彩検定2級</div>
-                    <div class="minor-category-summary" id="minor-category-summary">読み込み中...</div>
-                </div>
-            </div>
         </header>
 
         <div class="quiz-container">
@@ -261,11 +239,6 @@
             </div>
 
             <div class="question-section">
-                <div class="category-display">
-                    <span class="major-category" id="major-category">色彩検定2級</span>
-                    <span class="category-separator">></span>
-                    <span class="minor-category" id="minor-category">読み込み中...</span>
-                </div>
                 <h2 class="question-number">問題 <span id="question-number">1</span></h2>
                 <p class="question-text" id="question-text">問題を読み込み中...</p>
             </div>
@@ -438,6 +411,28 @@
             </div>
         </div>
 
+        <!-- 履歴パネル -->
+        <div class="history-panel">
+            <div class="answer-history" id="answer-history">
+                <span class="history-label">履歴:</span>
+                <div class="history-dots" id="history-dots"></div>
+            </div>
+            <div class="data-source" id="data-source">
+                <span class="source-indicator" id="source-indicator">📊 データソース: 確認中...</span>
+            </div>
+            <div class="category-summary" id="category-summary" style="display: none;">
+                <div class="category-info">
+                    <div class="major-category-title" id="major-category-title">色彩検定2級</div>
+                    <div class="minor-category-summary" id="minor-category-summary">読み込み中...</div>
+                </div>
+            </div>
+            <div class="category-display">
+                <span class="major-category" id="major-category">色彩検定2級</span>
+                <span class="category-separator">></span>
+                <span class="minor-category" id="minor-category">読み込み中...</span>
+            </div>
+        </div>
+        
         <div class="history-section">
             <h3>過去の成績</h3>
             <div class="controls">
