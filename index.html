@@ -27,19 +27,29 @@
                 flex-direction: column !important;
             }
             
-            /* 履歴を最下部へ */
-            .answer-history {
-                order: 10 !important;
+            /* クイズコンテナを上部に配置 */
+            .quiz-container {
+                order: 4 !important;
             }
             
-            /* カテゴリーサマリー（全112問）を下へ */
-            .category-summary {
-                order: 9 !important;
+            /* 結果セクション */
+            .results-section {
+                order: 5 !important;
             }
             
-            /* データソースを下へ */
+            /* データソースを下へ（履歴セクションの上） */
             .data-source {
-                order: 8 !important;
+                order: 11 !important;
+            }
+            
+            /* カテゴリーサマリー（全112問）を下へ（履歴セクションの上） */
+            .category-summary {
+                order: 12 !important;
+            }
+            
+            /* 履歴を下へ（データソースとカテゴリーサマリーの上） */
+            .answer-history {
+                order: 13 !important;
             }
             /* タイトルを小さく */
             .title {
@@ -210,7 +220,7 @@
 <body>
     <div class="container">
         <header>
-            <h1 class="title">🎯 4択クイズアプリ <span style="position: absolute; right: 20px; top: 20px; font-size: 14px; color: #666;">v0.18</span></h1>
+            <h1 class="title">🎯 4択クイズアプリ <span style="position: absolute; right: 20px; top: 20px; font-size: 14px; color: #666;">v0.19</span></h1>
             
             <!-- Google認証セクション -->
             <div class="auth-section" id="authSection" style="background: #e7f3ff; padding: 8px; border-radius: 5px; margin: 10px 0; text-align: center;">
