@@ -124,6 +124,12 @@ class QuizApp {
         this.restartBtn.addEventListener('click', () => this.restartQuiz());
         this.clearHistoryBtn.addEventListener('click', () => this.clearHistory());
         
+        // クイック開始ボタン（上部の大きなボタン）
+        const quickStartBtn = document.getElementById('quick-start-btn');
+        if (quickStartBtn) {
+            quickStartBtn.addEventListener('click', () => this.startQuiz());
+        }
+        
         // 統計ボタン
         const categoryStatsBtn = document.getElementById('category-stats-btn');
         const masteryStatsBtn = document.getElementById('mastery-stats-btn');

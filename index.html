@@ -282,7 +282,7 @@
 <body>
     <div class="container">
         <header>
-            <h1 class="title">🎯 4択クイズアプリ <span style="position: absolute; right: 20px; top: 20px; font-size: 14px; color: #666;">v0.23</span></h1>
+            <h1 class="title">🎯 4択クイズアプリ <span style="position: absolute; right: 20px; top: 20px; font-size: 14px; color: #666;">v0.24</span></h1>
             
             <!-- Google認証セクション -->
             <div class="auth-section" id="authSection" style="background: #e7f3ff; padding: 8px; border-radius: 5px; margin: 10px 0; text-align: center;">
@@ -299,7 +299,7 @@
             
             <!-- クイズ開始ボタンをGoogleログインの下に移動 -->
             <div class="quick-start-section" style="text-align: center; padding: 10px 0;">
-                <button class="control-btn quick-start-btn" onclick="document.getElementById('start-btn').click()" style="font-size: 16px; padding: 10px 30px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">🎮 クイズ開始</button>
+                <button class="control-btn quick-start-btn" id="quick-start-btn" style="font-size: 16px; padding: 10px 30px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">🎮 クイズ開始</button>
             </div>
             
             <div class="stats">
@@ -635,8 +635,13 @@
         </div>
     </div>
 
+    <!-- コア機能（変更不可） -->
     <script src="safe-storage.js"></script>
     <script src="safe-dom-helper.js"></script>
+    <script src="core-functions.js"></script>
+    
+    <!-- カスタムUI（変更可能） -->
+    <script src="custom-ui.js"></script>
     
     <!-- Firebase初期化を直接実行 -->
     <script>
