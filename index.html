@@ -124,15 +124,19 @@
                 margin-left: 5px !important;
             }
             
-            /* 統計情報を確実に1行に */
+            /* 古い統計情報を非表示 */
             .stats {
-                display: flex !important;
-                justify-content: space-between !important;
-                padding: 3px 5px !important;
-                font-size: 10px !important;
-                flex-wrap: nowrap !important;
-                gap: 5px !important;
-                white-space: nowrap !important;
+                display: none !important;
+            }
+            
+            /* テーブル形式の統計情報（モバイル用調整） */
+            .stats-table-section table {
+                font-size: 11px !important;
+            }
+            
+            .stats-table-section th,
+            .stats-table-section td {
+                padding: 5px !important;
             }
             
             .stat {
@@ -282,7 +286,7 @@
 <body>
     <div class="container">
         <header>
-            <h1 class="title">🎯 4択クイズアプリ <span style="position: absolute; right: 20px; top: 20px; font-size: 14px; color: #666;">v0.30</span></h1>
+            <h1 class="title">🎯 4択クイズアプリ <span style="position: absolute; right: 20px; top: 20px; font-size: 14px; color: #666;">v0.31</span></h1>
             
             <!-- Google認証セクション -->
             <div class="auth-section" id="authSection" style="background: #e7f3ff; padding: 8px; border-radius: 5px; margin: 10px 0; text-align: center;">
@@ -295,15 +299,35 @@
                 </div>
             </div>
             
-            <!-- クイズ開始ボタンをGoogleログインの下に移動 -->
-            <div class="quick-start-section" style="text-align: center; padding: 10px 0;">
-                <button class="control-btn quick-start-btn" id="quick-start-btn" style="font-size: 16px; padding: 10px 30px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">🎮 クイズ開始</button>
+            <!-- 統計情報をテーブル形式で表示 -->
+            <div class="stats-table-section" style="margin: 10px 0;">
+                <table style="width: 100%; border-collapse: collapse; background: white; border: 1px solid #dee2e6; border-radius: 5px;">
+                    <thead>
+                        <tr style="background: #f8f9fa;">
+                            <th style="padding: 8px; text-align: center; border-right: 1px solid #dee2e6; font-size: 12px;">正解数</th>
+                            <th style="padding: 8px; text-align: center; border-right: 1px solid #dee2e6; font-size: 12px;">問題数</th>
+                            <th style="padding: 8px; text-align: center; font-size: 12px;">正解率</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 8px; text-align: center; border-right: 1px solid #dee2e6; font-weight: bold; font-size: 14px;">
+                                <span id="correct-count">0</span>
+                            </td>
+                            <td style="padding: 8px; text-align: center; border-right: 1px solid #dee2e6; font-weight: bold; font-size: 14px;">
+                                <span id="total-count">0</span>
+                            </td>
+                            <td style="padding: 8px; text-align: center; font-weight: bold; font-size: 14px; color: #28a745;">
+                                <span id="accuracy">0%</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
             
-            <div class="stats">
-                <span class="stat">正解数: <span id="correct-count">0</span></span>
-                <span class="stat">問題数: <span id="total-count">0</span></span>
-                <span class="stat">正解率: <span id="accuracy">0%</span></span>
+            <!-- クイズ開始ボタンをテーブルの下に移動 -->
+            <div class="quick-start-section" style="text-align: center; padding: 10px 0;">
+                <button class="control-btn quick-start-btn" id="quick-start-btn" style="font-size: 16px; padding: 10px 30px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">🎮 クイズ開始</button>
             </div>
         </header>
 
