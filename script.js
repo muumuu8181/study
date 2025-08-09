@@ -974,7 +974,9 @@ class QuizApp {
             date: new Date().toLocaleString('ja-JP'),
             score: this.score,
             total: this.questions.length,
-            accuracy: accuracy
+            accuracy: accuracy,
+            mode: this.selectedMode,
+            timestamp: Date.now()
         };
         
         this.history.unshift(result);
@@ -982,7 +984,21 @@ class QuizApp {
             this.history = this.history.slice(0, 10);
         }
         
+        // ローカルストレージに保存
         SafeStorage.setItem('quizHistory', this.history);
+        
+        // Firebaseにも保存（認証済みの場合）
+        if (window.firebaseAuth && window.firebaseAuth.isAuthenticated()) {
+            const quizData = {
+                correct: this.score,
+                total: this.questions.length,
+                accuracy: accuracy,
+                mode: this.selectedMode,
+                masteryData: SafeStorage.getItem('masteryData', {})
+            };
+            window.firebaseAuth.saveQuizData(quizData);
+            console.log('✅ クイズ結果をFirebaseに保存');
+        }
     }
     
     loadHistory() {
@@ -998,6 +1014,21 @@ class QuizApp {
         if (confirm('履歴をすべて削除しますか？')) {
             this.history = [];
             localStorage.removeItem('quizHistory');
+            
+            // Firebaseからも削除（認証済みの場合）
+            if (window.firebaseAuth && window.firebaseAuth.isAuthenticated()) {
+                const user = window.firebaseAuth.getCurrentUser();
+                if (user) {
+                    firebase.database().ref(`users/${user.uid}/quiz_results`).remove()
+                        .then(() => {
+                            console.log('✅ Firebase履歴削除完了');
+                        })
+                        .catch((error) => {
+                            console.error('Firebase履歴削除エラー:', error);
+                        });
+                }
+            }
+            
             this.loadHistory();
         }
     }
