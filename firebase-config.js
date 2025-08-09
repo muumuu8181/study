@@ -29,19 +29,43 @@ googleProvider.addScope('profile');
 googleProvider.addScope('email');
 
 // Google認証関数
-function signInWithGoogle() {
-    auth.signInWithPopup(googleProvider)
-        .then((result) => {
-            currentUser = result.user;
-            console.log('🔥 Google認証成功:', currentUser.displayName || currentUser.email);
-            updateAuthUI(true);
-            // 既存のローカルデータをFirebaseに移行
-            migrateLocalDataToFirebase();
-        })
-        .catch((error) => {
-            console.error('Google認証エラー:', error);
-            alert('ログインに失敗しました: ' + error.message);
-        });
+async function signInWithGoogle() {
+    try {
+        console.log('🔐 Googleログイン開始...');
+        console.log('📍 現在のURL:', window.location.href);
+        console.log('📍 現在のドメイン:', window.location.hostname);
+        
+        const result = await auth.signInWithPopup(googleProvider);
+        currentUser = result.user;
+        console.log('🔥 Google認証成功:', currentUser.displayName || currentUser.email);
+        updateAuthUI(true);
+        // 既存のローカルデータをFirebaseに移行
+        migrateLocalDataToFirebase();
+    } catch (error) {
+        console.error('❌ Google認証エラー:', error);
+        console.error('エラーコード:', error.code);
+        console.error('エラーメッセージ:', error.message);
+        
+        // エラーコード別の詳細メッセージ
+        let errorMessage = 'ログインに失敗しました: ';
+        switch(error.code) {
+            case 'auth/unauthorized-domain':
+                errorMessage += 'このドメインは認証が許可されていません。Firebase Consoleで設定が必要です。\n現在のドメイン: ' + window.location.hostname;
+                console.error('🚨 認証ドメインエラー - Firebase Consoleで以下のドメインを追加してください:');
+                console.error('   ' + window.location.hostname);
+                break;
+            case 'auth/popup-blocked':
+                errorMessage += 'ポップアップがブロックされました。ブラウザ設定を確認してください。';
+                break;
+            case 'auth/popup-closed-by-user':
+                errorMessage += 'ログインがキャンセルされました。';
+                break;
+            default:
+                errorMessage += error.message;
+        }
+        
+        alert(errorMessage);
+    }
 }
 
 // ログアウト関数
@@ -251,6 +275,20 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // 初期認証状態を確認
     updateAuthUI(!!currentUser);
+    
+    // デバッグ情報を表示
+    console.log('🔍 Firebase認証ドメイン設定確認:');
+    console.log('   設定されたauthDomain:', firebaseConfig.authDomain);
+    console.log('   現在のドメイン:', window.location.hostname);
+    console.log('   現在のプロトコル:', window.location.protocol);
+    
+    // GitHub Pagesの場合の警告
+    if (window.location.hostname.includes('github.io')) {
+        console.log('⚠️ GitHub Pagesで実行中です。');
+        console.log('   Firebase Consoleで以下を確認してください:');
+        console.log('   1. Authentication > Settings > Authorized domains');
+        console.log('   2. "' + window.location.hostname + '" が追加されているか確認');
+    }
 });
 
 // グローバルに公開（既存のスクリプトから使用可能にする）
@@ -263,3 +301,4 @@ window.firebaseAuth = {
 };
 
 console.log('🔥 Firebase設定完了 - Google認証準備完了');
+console.log('📍 実行環境:', window.location.hostname || 'ローカル');
