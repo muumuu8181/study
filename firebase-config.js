@@ -196,9 +196,15 @@ function loadDataFromFirebase() {
 function migrateLocalDataToFirebase() {
     if (!currentUser) return;
     
+    // SafeStorageが利用可能か確認
+    if (typeof SafeStorage === 'undefined') {
+        console.warn('SafeStorageが未定義のため、移行をスキップ');
+        return;
+    }
+    
     // 既存のローカルストレージデータを取得
-    const localHistory = SafeStorage.get('quizHistory') || [];
-    const localMastery = SafeStorage.get('masteryData') || {};
+    const localHistory = SafeStorage.getItem('quizHistory', []);
+    const localMastery = SafeStorage.getItem('masteryData', {});
     
     if (localHistory.length > 0) {
         console.log('📦 ローカルデータをFirebaseに移行中...');
@@ -255,7 +261,7 @@ function updateQuizHistoryFromFirebase(results) {
 function updateMasteryDataFromFirebase(masteryData) {
     // 既存の習熟度管理システムに反映
     if (typeof SafeStorage !== 'undefined') {
-        SafeStorage.set('masteryData', masteryData);
+        SafeStorage.setItem('masteryData', masteryData);
     }
 }
 
