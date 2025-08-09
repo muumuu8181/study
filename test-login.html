@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ログインテスト</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #log {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Firebaseログインテスト</h1>
+    
+    <div>
+        <button onclick="testLogin()">🔐 Googleでログイン</button>
+        <button onclick="testLogout()">ログアウト</button>
+        <button onclick="checkStatus()">状態確認</button>
+        <button onclick="clearLog()">ログクリア</button>
+    </div>
+    
+    <div id="status">
+        <h3>現在の状態:</h3>
+        <p id="userStatus">未ログイン</p>
+    </div>
+    
+    <div id="log">
+        ログ出力エリア
+    </div>
+    
+    <script>
+        // Firebase設定
+        const firebaseConfig = {
+            "apiKey": "AIzaSyA5PXKChizYDCXF_GJ4KL6Ylq9K5hCPXWE",
+            "authDomain": "shares-b1b97.firebaseapp.com",
+            "databaseURL": "https://shares-b1b97-default-rtdb.firebaseio.com",
+            "projectId": "shares-b1b97",
+            "storageBucket": "shares-b1b97.firebasestorage.app",
+            "messagingSenderId": "38311063248",
+            "appId": "1:38311063248:web:0d2d5726d12b305b24b8d5"
+        };
+        
+        // Firebase初期化
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+        
+        // ログ関数
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString('ja-JP');
+            const logEntry = `[${timestamp}] ${message}\n`;
+            const span = document.createElement('span');
+            span.className = type;
+            span.textContent = logEntry;
+            logDiv.appendChild(span);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+        
+        function clearLog() {
+            document.getElementById('log').innerHTML = 'ログクリア完了\n';
+        }
+        
+        // Googleログインテスト
+        async function testLogin() {
+            log('========== Googleログイン開始 ==========', 'info');
+            log('現在のURL: ' + window.location.href, 'info');
+            log('現在のドメイン: ' + window.location.hostname, 'info');
+            
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                log('Googleプロバイダー作成完了', 'info');
+                
+                log('ポップアップを開いています...', 'info');
+                const result = await auth.signInWithPopup(provider);
+                
+                log('✅ ログイン成功！', 'success');
+                log('ユーザー名: ' + result.user.displayName, 'success');
+                log('メール: ' + result.user.email, 'success');
+                log('UID: ' + result.user.uid, 'success');
+                
+                updateStatus(result.user);
+                
+                // データベーステスト
+                log('データベース書き込みテスト...', 'info');
+                await database.ref('test-login/' + result.user.uid).set({
+                    timestamp: Date.now(),
+                    name: result.user.displayName,
+                    test: 'success'
+                });
+                log('✅ データベース書き込み成功！', 'success');
+                
+            } catch (error) {
+                log('❌ エラー発生！', 'error');
+                log('エラーコード: ' + error.code, 'error');
+                log('エラーメッセージ: ' + error.message, 'error');
+                
+                if (error.code === 'auth/unauthorized-domain') {
+                    log('🚨 認証ドメインエラー', 'error');
+                    log('Firebase Consoleで ' + window.location.hostname + ' を追加してください', 'error');
+                } else if (error.code === 'auth/popup-blocked') {
+                    log('ポップアップがブロックされました', 'error');
+                } else if (error.code === 'auth/popup-closed-by-user') {
+                    log('ユーザーがログインをキャンセルしました', 'info');
+                }
+            }
+        }
+        
+        // ログアウト
+        async function testLogout() {
+            try {
+                await auth.signOut();
+                log('✅ ログアウト成功', 'success');
+                updateStatus(null);
+            } catch (error) {
+                log('ログアウトエラー: ' + error.message, 'error');
+            }
+        }
+        
+        // 状態確認
+        function checkStatus() {
+            const user = auth.currentUser;
+            if (user) {
+                log('✅ ログイン中: ' + user.displayName, 'success');
+            } else {
+                log('❌ 未ログイン', 'info');
+            }
+        }
+        
+        // 状態更新
+        function updateStatus(user) {
+            const statusDiv = document.getElementById('userStatus');
+            if (user) {
+                statusDiv.innerHTML = `
+                    <span class="success">✅ ログイン中</span><br>
+                    名前: ${user.displayName}<br>
+                    メール: ${user.email}
+                `;
+            } else {
+                statusDiv.innerHTML = '<span class="info">❌ 未ログイン</span>';
+            }
+        }
+        
+        // 認証状態の監視
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                log('🔐 認証状態: ログイン中 (' + user.displayName + ')', 'success');
+                updateStatus(user);
+            } else {
+                log('🔓 認証状態: 未ログイン', 'info');
+                updateStatus(null);
+            }
+        });
+        
+        // 初期ログ
+        log('Firebase初期化完了', 'info');
+        log('テストページ準備完了', 'info');
+    </script>
+</body>
+</html>

@@ -296,7 +296,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Googleログインボタン
     const googleLoginBtn = document.getElementById('googleLoginBtn');
     if (googleLoginBtn) {
-        googleLoginBtn.addEventListener('click', signInWithGoogle);
+        console.log('✅ Googleログインボタン発見');
+        googleLoginBtn.addEventListener('click', () => {
+            console.log('🔐 ログインボタンクリック！');
+            signInWithGoogle();
+        });
+    } else {
+        console.error('❌ Googleログインボタンが見つかりません');
     }
     
     // ログアウトボタン
@@ -310,7 +316,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // デバッグ情報を表示
     console.log('🔍 Firebase認証ドメイン設定確認:');
-    console.log('   設定されたauthDomain:', firebaseConfig.authDomain);
+    console.log('   設定されたauthDomain:', 'shares-b1b97.firebaseapp.com');
     console.log('   現在のドメイン:', window.location.hostname);
     console.log('   現在のプロトコル:', window.location.protocol);
     
