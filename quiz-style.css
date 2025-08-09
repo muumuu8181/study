@@ -447,7 +447,7 @@ header {
 .options-section {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 15px;
+    gap: 8px;
     margin-bottom: 30px;
 }
 
