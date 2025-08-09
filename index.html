@@ -10,6 +10,29 @@
     <style>
         /* モバイル用スタイル（768px以下） */
         @media (max-width: 768px) {
+            /* パネルを視覚的に分ける */
+            header {
+                background: #f8f9fa !important;
+                border-bottom: 2px solid #dee2e6 !important;
+                margin-bottom: 0 !important;
+                padding-bottom: 10px !important;
+            }
+            
+            .quiz-container {
+                background: white !important;
+                border: 1px solid #dee2e6 !important;
+                border-radius: 8px !important;
+                margin: 10px 5px !important;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+            }
+            
+            .history-panel {
+                background: #f1f3f5 !important;
+                border-top: 2px solid #dee2e6 !important;
+                padding: 10px !important;
+                margin-top: 10px !important;
+            }
+            
             /* パネル構成の順序設定 */
             .container {
                 display: flex !important;
@@ -150,6 +173,21 @@
                 font-size: 11px !important;
             }
             
+            /* 画像スペースを小さく */
+            .character-section {
+                padding: 5px !important;
+                margin: 5px 0 !important;
+            }
+            
+            .character-container {
+                transform: scale(0.7) !important;
+                margin: -20px 0 !important;
+            }
+            
+            .character-image img {
+                max-height: 60px !important;
+            }
+            
             /* 問題番号と問題文を小さく */
             .question-number {
                 font-size: 12px !important;
@@ -232,7 +270,7 @@
 <body>
     <div class="container">
         <header>
-            <h1 class="title">🎯 4択クイズアプリ <span style="position: absolute; right: 20px; top: 20px; font-size: 14px; color: #666;">v0.21</span></h1>
+            <h1 class="title">🎯 4択クイズアプリ <span style="position: absolute; right: 20px; top: 20px; font-size: 14px; color: #666;">v0.22</span></h1>
             
             <!-- Google認証セクション -->
             <div class="auth-section" id="authSection" style="background: #e7f3ff; padding: 8px; border-radius: 5px; margin: 10px 0; text-align: center;">
@@ -251,6 +289,11 @@
                 <span class="stat">正解数: <span id="correct-count">0</span></span>
                 <span class="stat">問題数: <span id="total-count">0</span></span>
                 <span class="stat">正解率: <span id="accuracy">0%</span></span>
+            </div>
+            
+            <!-- クイズ開始ボタンをタイトル直下に移動 -->
+            <div class="quick-start-section" style="text-align: center; padding: 10px 0;">
+                <button class="control-btn quick-start-btn" onclick="document.getElementById('start-btn').click()" style="font-size: 16px; padding: 10px 30px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">🎮 クイズ開始</button>
             </div>
         </header>
 
