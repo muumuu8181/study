@@ -90,7 +90,7 @@ class QuizApp {
         
         // 画像管理
         this.imageCache = new Map();
-        this.supportedExtensions = ['png', 'jpg', 'jpeg', 'svg', 'gif', 'webp'];
+        this.supportedExtensions = ['svg'];  // SVGファイルのみに限定して404エラーを減らす
         this.animationPatterns = ['correct', 'bounce', 'spin', 'pulse', 'zoom'];
         this.encourageAnimations = ['encourage', 'shake'];
         this.currentAnimationIndex = 0;
@@ -1547,22 +1547,13 @@ class QuizApp {
     
     // 画像の自動検出と初期化
     async initializeImages() {
-        const imageTypes = [
-            { name: 'normal', keywords: ['normal', 'default', 'base'] },
-            { name: 'happy', keywords: ['happy', 'correct', 'smile', 'joy'] },
-            { name: 'encourage', keywords: ['encourage', 'incorrect', 'cheer', 'support', 'fail'] },
-            { name: 'excellent', keywords: ['excellent', 'perfect', 'great', 'best'] },
-            { name: 'good', keywords: ['good', 'nice', 'well'] }
-        ];
+        // SVGファイルを直接設定（404エラーを避けるため）
+        const imageTypes = ['normal', 'happy', 'encourage', 'excellent', 'good'];
         
         for (const type of imageTypes) {
-            const imagePath = await this.findImageByKeywords(type.keywords);
-            if (imagePath) {
-                this.imageCache.set(type.name, imagePath);
-            } else {
-                // フォールバック：デフォルトSVGを使用
-                this.imageCache.set(type.name, `images/character-${type.name}.svg`);
-            }
+            // 既存のSVGファイルを直接指定（検索せずに直接設定）
+            const imagePath = `images/character-${type}.svg`;
+            this.imageCache.set(type, imagePath);
         }
         
         // 初期画像を設定
