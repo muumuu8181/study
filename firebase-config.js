@@ -153,12 +153,13 @@ function saveQuizDataToFirebase(quizData) {
     };
     
     // クイズ結果を保存
-    database.ref(`users/${userId}/quiz_results/${timestamp}`).set(dataToSave
-    }).then(() => {
-        console.log('✅ Firebaseにクイズデータ保存成功');
-    }).catch((error) => {
-        console.error('Firebase保存エラー:', error);
-    });
+    database.ref(`users/${userId}/quiz_results/${timestamp}`).set(dataToSave)
+        .then(() => {
+            console.log('✅ Firebaseにクイズデータ保存成功');
+        })
+        .catch((error) => {
+            console.error('Firebase保存エラー:', error);
+        });
     
     // 習熟度データも保存
     if (quizData.masteryData) {
