@@ -282,13 +282,11 @@
 <body>
     <div class="container">
         <header>
-            <h1 class="title">🎯 4択クイズアプリ <span style="position: absolute; right: 20px; top: 20px; font-size: 14px; color: #666;">v0.25</span></h1>
+            <h1 class="title">🎯 4択クイズアプリ <span style="position: absolute; right: 20px; top: 20px; font-size: 14px; color: #666;">v0.26</span></h1>
             
             <!-- Google認証セクション -->
             <div class="auth-section" id="authSection" style="background: #e7f3ff; padding: 8px; border-radius: 5px; margin: 10px 0; text-align: center;">
-                <button class="auth-btn" id="googleLoginBtn" style="background: #4285f4; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer;">
-                    🔐 Googleでログイン
-                </button>
+                <button class="auth-btn" id="googleLoginBtn" style="background: #4285f4; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer;">🔐 Googleでログイン</button>
                 <div id="userInfo" style="display: none;">
                     <span>👤 <span id="userName"></span></span>
                     <button class="auth-btn" id="logoutBtn" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; margin-left: 10px;">
@@ -656,17 +654,27 @@
             "appId": "1:38311063248:web:0d2d5726d12b305b24b8d5"
         };
 
-        // Firebase初期化
-        firebase.initializeApp(firebaseConfig);
-        console.log('🔥 Firebase初期化完了 (HTML内で直接実行)');
+        // Firebase初期化（重複チェック付き）
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+            console.log('🔥 Firebase初期化完了 (HTML内で直接実行)');
+        } else {
+            console.log('✅ Firebase既に初期化済み (HTML)');
+        }
         
         // デバッグ情報
         console.log('現在のURL:', window.location.href);
         console.log('現在のドメイン:', window.location.hostname);
+        
+        // グローバル変数として設定を公開
+        window.firebaseConfig = firebaseConfig;
     </script>
     
     <script src="firebase-config.js"></script>
     <script src="questions.js"></script>
     <script src="script.js"></script>
+    
+    <!-- デバッグ用（本番環境では削除） -->
+    <script src="debug-auth.js"></script>
 </body>
 </html>
