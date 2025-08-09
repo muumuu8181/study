@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase認証デバッグ</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .log-area {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        button {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #357ae8;
+        }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        .warning { color: orange; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Firebase認証デバッグツール</h1>
+        
+        <div>
+            <button onclick="checkEnvironment()">1. 環境チェック</button>
+            <button onclick="testSimpleAuth()">2. シンプル認証テスト</button>
+            <button onclick="testGoogleAuth()">3. Google認証テスト</button>
+            <button onclick="checkAuthDomains()">4. 認証ドメイン確認</button>
+            <button onclick="clearLog()">ログクリア</button>
+        </div>
+        
+        <h3>ログ:</h3>
+        <div class="log-area" id="logArea"></div>
+    </div>
+    
+    <script>
+        // Firebase設定（同じ設定を使用）
+        const firebaseConfig = {
+            "apiKey": "AIzaSyA5PXKChizYDCXF_GJ4KL6Ylq9K5hCPXWE",
+            "authDomain": "shares-b1b97.firebaseapp.com",
+            "databaseURL": "https://shares-b1b97-default-rtdb.firebaseio.com",
+            "projectId": "shares-b1b97",
+            "storageBucket": "shares-b1b97.firebasestorage.app",
+            "messagingSenderId": "38311063248",
+            "appId": "1:38311063248:web:0d2d5726d12b305b24b8d5"
+        };
+        
+        // Firebase初期化
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+        
+        // ログ機能
+        function log(message, type = 'info') {
+            const logArea = document.getElementById('logArea');
+            const timestamp = new Date().toLocaleTimeString('ja-JP');
+            const logEntry = `[${timestamp}] ${message}\n`;
+            logArea.innerHTML += `<span class="${type}">${logEntry}</span>`;
+            logArea.scrollTop = logArea.scrollHeight;
+            console.log(message);
+        }
+        
+        function clearLog() {
+            document.getElementById('logArea').innerHTML = '';
+            log('ログをクリアしました', 'info');
+        }
+        
+        // 環境チェック
+        function checkEnvironment() {
+            log('=== 環境チェック開始 ===', 'info');
+            log('現在のURL: ' + window.location.href, 'info');
+            log('ホスト名: ' + window.location.hostname, 'info');
+            log('プロトコル: ' + window.location.protocol, 'info');
+            log('ポート: ' + (window.location.port || 'デフォルト'), 'info');
+            
+            log('\nFirebase設定:', 'info');
+            log('プロジェクトID: ' + firebaseConfig.projectId, 'info');
+            log('認証ドメイン: ' + firebaseConfig.authDomain, 'info');
+            log('APIキー: ' + firebaseConfig.apiKey.substring(0, 10) + '...', 'info');
+            
+            log('\nブラウザ情報:', 'info');
+            log('User Agent: ' + navigator.userAgent.substring(0, 50) + '...', 'info');
+            
+            // GitHub Pages判定
+            if (window.location.hostname.includes('github.io')) {
+                log('\n⚠️ GitHub Pagesで実行中', 'warning');
+                log('Firebase Consoleで "' + window.location.hostname + '" の追加が必要', 'warning');
+            }
+            
+            log('=== 環境チェック完了 ===', 'success');
+        }
+        
+        // シンプル認証テスト
+        async function testSimpleAuth() {
+            log('=== シンプル認証テスト開始 ===', 'info');
+            
+            try {
+                // 匿名認証を試す
+                log('匿名認証を試行中...', 'info');
+                const result = await auth.signInAnonymously();
+                log('✅ 匿名認証成功！', 'success');
+                log('ユーザーID: ' + result.user.uid, 'success');
+                
+                // サインアウト
+                await auth.signOut();
+                log('サインアウト完了', 'info');
+                
+            } catch (error) {
+                log('❌ エラー: ' + error.message, 'error');
+                log('エラーコード: ' + error.code, 'error');
+            }
+            
+            log('=== シンプル認証テスト完了 ===', 'info');
+        }
+        
+        // Google認証テスト
+        async function testGoogleAuth() {
+            log('=== Google認証テスト開始 ===', 'info');
+            
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                log('Googleプロバイダー設定完了', 'info');
+                log('ポップアップを開いています...', 'info');
+                
+                const result = await auth.signInWithPopup(provider);
+                log('✅ Google認証成功！', 'success');
+                log('ユーザー名: ' + result.user.displayName, 'success');
+                log('メール: ' + result.user.email, 'success');
+                log('UID: ' + result.user.uid, 'success');
+                
+                // データベーステスト
+                log('\nデータベース書き込みテスト...', 'info');
+                await database.ref('debug-test/' + result.user.uid).set({
+                    timestamp: Date.now(),
+                    name: result.user.displayName,
+                    test: 'success'
+                });
+                log('✅ データベース書き込み成功！', 'success');
+                
+                // サインアウト
+                await auth.signOut();
+                log('サインアウト完了', 'info');
+                
+            } catch (error) {
+                log('❌ エラー: ' + error.message, 'error');
+                log('エラーコード: ' + error.code, 'error');
+                
+                if (error.code === 'auth/unauthorized-domain') {
+                    log('\n🚨 重要: 認証ドメインエラー', 'error');
+                    log('Firebase Consoleで以下の手順を実行してください:', 'warning');
+                    log('1. https://console.firebase.google.com/ にアクセス', 'warning');
+                    log('2. プロジェクト "shares-b1b97" を選択', 'warning');
+                    log('3. Authentication → Settings → Authorized domains', 'warning');
+                    log('4. "' + window.location.hostname + '" を追加', 'warning');
+                }
+            }
+            
+            log('=== Google認証テスト完了 ===', 'info');
+        }
+        
+        // 認証ドメイン確認
+        function checkAuthDomains() {
+            log('=== 認証ドメイン確認 ===', 'info');
+            log('現在のドメイン: ' + window.location.hostname, 'info');
+            log('\nFirebase Consoleで許可が必要なドメイン:', 'warning');
+            log('- localhost (ローカルテスト用)', 'info');
+            log('- muumuu8181.github.io (GitHub Pages用)', 'info');
+            log('- shares-b1b97.firebaseapp.com (Firebase Hosting)', 'info');
+            log('\n確認URL:', 'info');
+            log('https://console.firebase.google.com/project/shares-b1b97/authentication/settings', 'info');
+            log('=== 確認完了 ===', 'info');
+        }
+        
+        // 初期化時の状態確認
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                log('🔐 認証済み: ' + (user.displayName || user.uid), 'success');
+            } else {
+                log('🔓 未認証', 'info');
+            }
+        });
+        
+        // 初期ログ
+        log('Firebase認証デバッグツール起動', 'info');
+        log('Firebase SDK v8.10.0', 'info');
+    </script>
+</body>
+</html>
