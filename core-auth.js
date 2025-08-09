@@ -40,7 +40,21 @@
             
             try {
                 const provider = new firebase.auth.GoogleAuthProvider();
-                const result = await firebase.auth().signInWithPopup(provider);
+                provider.addScope('profile');
+                provider.addScope('email');
+                
+                // ポップアップブロック対策
+                let result;
+                try {
+                    result = await firebase.auth().signInWithPopup(provider);
+                } catch (popupError) {
+                    if (popupError.code === 'auth/popup-blocked') {
+                        console.log('ポップアップがブロックされました。リダイレクト方式を試します。');
+                        // リダイレクト方式にフォールバック
+                        return firebase.auth().signInWithRedirect(provider);
+                    }
+                    throw popupError;
+                }
                 
                 this.currentUser = result.user;
                 console.log('✅ [CoreAuth] ログイン成功:', result.user.displayName);
@@ -48,18 +62,86 @@
                 // UI更新
                 this.updateAuthUI(true);
                 
-                // データ同期
-                if (window.firebaseAuth && window.firebaseAuth.saveQuizData) {
-                    // 既存データの同期処理
-                }
+                // ローカルデータをFirebaseに移行
+                this.migrateLocalDataToFirebase();
                 
                 return result.user;
                 
             } catch (error) {
                 console.error('❌ [CoreAuth] ログインエラー:', error);
-                alert('ログインエラー: ' + error.message);
+                
+                let errorMessage = 'ログインエラー: ';
+                switch(error.code) {
+                    case 'auth/unauthorized-domain':
+                        errorMessage += 'このドメインは認証が許可されていません。';
+                        break;
+                    case 'auth/popup-closed-by-user':
+                        errorMessage += 'ログインがキャンセルされました。';
+                        break;
+                    default:
+                        errorMessage += error.message;
+                }
+                
+                alert(errorMessage);
                 throw error;
             }
+        },
+        
+        // データ保存機能（変更禁止）
+        saveQuizDataToFirebase(quizData) {
+            if (!this.currentUser) {
+                console.log('[CoreAuth] 未認証のため、ローカルストレージに保存');
+                return;
+            }
+            
+            const userId = this.currentUser.uid;
+            const timestamp = Date.now();
+            
+            const dataToSave = {
+                ...quizData,
+                mode: quizData.mode || 'normal',
+                timestamp: timestamp,
+                userEmail: this.currentUser.email,
+                userName: this.currentUser.displayName
+            };
+            
+            // クイズ結果を保存
+            firebase.database().ref(`users/${userId}/quiz_results/${timestamp}`).set(dataToSave)
+                .then(() => {
+                    console.log('✅ [CoreAuth] Firebaseにクイズデータ保存成功');
+                })
+                .catch((error) => {
+                    console.error('[CoreAuth] Firebase保存エラー:', error);
+                });
+        },
+        
+        // ローカルデータをFirebaseに移行
+        migrateLocalDataToFirebase() {
+            if (!this.currentUser || typeof SafeStorage === 'undefined') return;
+            
+            const localHistory = SafeStorage.getItem('quizHistory', []);
+            if (localHistory.length === 0) return;
+            
+            console.log('[CoreAuth] ローカルデータをFirebaseに移行中...');
+            const userId = this.currentUser.uid;
+            const updates = {};
+            
+            localHistory.forEach((item, index) => {
+                const timestamp = item.timestamp || Date.now() - (localHistory.length - index) * 1000;
+                updates[`users/${userId}/quiz_results/${timestamp}`] = {
+                    ...item,
+                    timestamp: timestamp,
+                    migratedFrom: 'localStorage'
+                };
+            });
+            
+            firebase.database().ref().update(updates)
+                .then(() => {
+                    console.log('✅ [CoreAuth] ローカルデータの移行完了');
+                })
+                .catch((error) => {
+                    console.error('[CoreAuth] データ移行エラー:', error);
+                });
         },
         
         // ログアウト（変更禁止）
@@ -169,6 +251,15 @@
     
     // 自動初期化
     window.CoreAuth.init();
+    
+    // グローバルに公開（既存のスクリプトから使用可能にする）
+    window.firebaseAuth = {
+        getCurrentUser: () => window.CoreAuth.currentUser,
+        isAuthenticated: () => window.CoreAuth.isAuthenticated(),
+        saveQuizData: (data) => window.CoreAuth.saveQuizDataToFirebase(data),
+        signIn: () => window.CoreAuth.signInWithGoogle(),
+        signOut: () => window.CoreAuth.signOut()
+    };
     
     console.log('✅ [CoreAuth] コア認証モジュール v1.0.0 読み込み完了');
     console.log('⚠️ このファイルは変更禁止です。UIカスタマイズはcustom-ui.jsで行ってください。');

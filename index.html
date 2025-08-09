@@ -282,7 +282,7 @@
 <body>
     <div class="container">
         <header>
-            <h1 class="title">🎯 4択クイズアプリ <span style="position: absolute; right: 20px; top: 20px; font-size: 14px; color: #666;">v0.29</span></h1>
+            <h1 class="title">🎯 4択クイズアプリ <span style="position: absolute; right: 20px; top: 20px; font-size: 14px; color: #666;">v0.30</span></h1>
             
             <!-- Google認証セクション -->
             <div class="auth-section" id="authSection" style="background: #e7f3ff; padding: 8px; border-radius: 5px; margin: 10px 0; text-align: center;">
@@ -671,12 +671,11 @@
         window.firebaseConfig = firebaseConfig;
     </script>
     
-    <script src="firebase-config.js"></script>
+    <!-- firebase-config.jsは無効化（core-auth.jsと競合するため） -->
+    <!-- <script src="firebase-config.js"></script> -->
+    
     <script src="questions.js"></script>
     <script src="script.js"></script>
-    
-    <!-- デバッグ用（本番環境では削除） -->
-    <script src="debug-auth.js"></script>
     
 </body>
 </html>
