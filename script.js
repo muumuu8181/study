@@ -911,7 +911,7 @@ class QuizApp {
         if (this.currentQuestionIndex < this.questions.length - 1) {
             if (this.autoProgressCheckbox.checked) {
                 // 次へ次へのテンポ重視設定
-                const delay = this.skipAnimations ? 200 : 500; // 0.2秒 または 0.5秒
+                const delay = this.skipAnimations ? 100 : 200; // 0.1秒 または 0.2秒
                 this.autoProgressTimer = setTimeout(() => {
                     this.nextQuestion();
                 }, delay);
@@ -921,7 +921,7 @@ class QuizApp {
             }
         } else {
             // 最後の問題：すぐに結果表示
-            const delay = this.skipAnimations ? 200 : 400; // 0.2秒 または 0.4秒
+            const delay = this.skipAnimations ? 100 : 200; // 0.1秒 または 0.2秒
             setTimeout(() => this.showResults(), delay);
         }
     }
@@ -1693,7 +1693,7 @@ class QuizApp {
         // アニメーションをリセット
         setTimeout(() => {
             this.characterSection.classList.remove(animationClass);
-        }, 1200);
+        }, 300);
     }
     
     // 短縮アニメーション
@@ -1710,7 +1710,7 @@ class QuizApp {
         // 短いアニメーションをリセット
         setTimeout(() => {
             this.characterSection.classList.remove(quickClass);
-        }, 300);
+        }, 150);
     }
     
     getRandomMessage(type) {
